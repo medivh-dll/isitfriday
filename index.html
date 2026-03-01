@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Is It Friday?</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=VT323&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:#fff;
+  color:#111;
+  font-family:'VT323',monospace;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:2rem;
+}
+
+.answer{
+  font-family:'Anton',sans-serif;
+  font-size:clamp(6rem,30vw,18rem);
+  line-height:1;
+  letter-spacing:-0.02em;
+  color:#111;
+  animation:appear 0.3s ease;
+}
+.answer.no{ color:#111; }
+.answer.yes{ color:#111; }
+
+@keyframes appear{
+  from{opacity:0;transform:scale(0.95);}
+  to{opacity:1;transform:scale(1);}
+}
+
+.day{
+  font-size:clamp(1rem,4vw,1.8rem);
+  color:#bbb;
+  letter-spacing:0.3em;
+  margin-top:0.5rem;
+  text-transform:uppercase;
+}
+
+.sub{
+  font-size:clamp(0.85rem,2.5vw,1.1rem);
+  color:#ccc;
+  letter-spacing:0.15em;
+  margin-top:2rem;
+  max-width:400px;
+  line-height:1.8;
+}
+
+.sub.yes-msg{ color:#aaa; }
+
+.border-top{
+  position:fixed;
+  top:0;left:0;right:0;
+  height:4px;
+  background:#111;
+}
+.border-bottom{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  height:4px;
+  background:#111;
+}
+
+.day-counter{
+  position:fixed;
+  bottom:1.5rem;
+  right:1.5rem;
+  font-size:0.72rem;
+  color:#ddd;
+  letter-spacing:0.15em;
+  text-align:right;
+  line-height:1.8;
+}
+
+.check-again{
+  margin-top:2.5rem;
+  font-size:0.8rem;
+  color:#ddd;
+  letter-spacing:0.2em;
+  cursor:pointer;
+  border:1px solid #eee;
+  padding:0.4rem 1.2rem;
+  transition:all 0.15s;
+  background:#fff;
+}
+.check-again:hover{
+  background:#111;
+  color:#fff;
+  border-color:#111;
+}
+
+.friday-confetti{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+.confetti-piece{
+  position:absolute;
+  width:8px;
+  height:8px;
+  background:#111;
+  top:-10px;
+  animation:fall linear forwards;
+}
+@keyframes fall{
+  to{transform:translateY(110vh) rotate(720deg);opacity:0;}
+}
+</style>
+</head>
+<body>
+
+<div class="border-top"></div>
+<div class="border-bottom"></div>
+
+<div class="friday-confetti" id="confetti"></div>
+
+<div class="answer" id="answer"></div>
+<div class="day" id="day"></div>
+<div class="sub" id="sub"></div>
+<button class="check-again" onclick="check()">CHECK AGAIN</button>
+
+<div class="day-counter" id="counter"></div>
+
+<script>
+const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+const noMessages = [
+  "It is not Friday.\nIt will never be Friday.\nFriday is a myth.",
+  "No.\nNot even close.\nGo back to work.",
+  "Absolutely not.\nStop refreshing this page.",
+  "No.\nBut you already knew that.\nYou just hoped.",
+  "Still no.\nIt wasn't Friday last time either.",
+  "Negative.\nThe concept of Friday has been cancelled.",
+  "No.\nFriday is aware of your desperation and is moving further away.",
+  "Nope.\nFriday has seen your search history and is disgusted.",
+  "Not Friday.\nNot even Friday-adjacent.",
+  "No.\nTime is a flat circle and Friday is the part you can't reach.",
+];
+
+const yesMessages = [
+  "IT IS FRIDAY.\nYou may now exist.",
+  "YES.\nGod is real and he works Mon–Thu.",
+  "FRIDAY.\nYou survived another week. Barely.",
+  "IT IS FRIDAY.\nThe prophecy was true.",
+  "YES.\nEverything is going to be okay.\nUntil Monday.",
+];
+
+function check() {
+  const now = new Date();
+  const dayIndex = now.getDay(); // 0=Sun, 6=Sat
+  const isFriday = dayIndex === 5;
+
+  const answerEl = document.getElementById('answer');
+  const dayEl = document.getElementById('day');
+  const subEl = document.getElementById('sub');
+  const counterEl = document.getElementById('counter');
+
+  answerEl.style.animation = 'none';
+  void answerEl.offsetWidth;
+  answerEl.style.animation = 'appear 0.3s ease';
+
+  if (isFriday) {
+    answerEl.textContent = 'YES';
+    answerEl.className = 'answer yes';
+    dayEl.textContent = '— it is Friday —';
+    const msg = yesMessages[Math.floor(Math.random() * yesMessages.length)];
+    subEl.textContent = msg;
+    subEl.className = 'sub yes-msg';
+    spawnConfetti();
+  } else {
+    answerEl.textContent = 'NO';
+    answerEl.className = 'answer no';
+    dayEl.textContent = `— it is ${days[dayIndex]} —`;
+    const msg = noMessages[Math.floor(Math.random() * noMessages.length)];
+    subEl.textContent = msg;
+    subEl.className = 'sub';
+    document.getElementById('confetti').innerHTML = '';
+  }
+
+  // days until Friday
+  const daysUntil = dayIndex === 5 ? 0 : (5 - dayIndex + 7) % 7;
+  counterEl.innerHTML = daysUntil === 0
+    ? `TODAY IS FRIDAY\nENJOY IT`
+    : `${daysUntil} DAY${daysUntil !== 1 ? 'S' : ''} UNTIL FRIDAY\n${(daysUntil * 24).toLocaleString()} HOURS\n${(daysUntil * 24 * 60).toLocaleString()} MINUTES`;
+}
+
+function spawnConfetti() {
+  const container = document.getElementById('confetti');
+  container.innerHTML = '';
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+    piece.style.animationDelay = (Math.random() * 1.5) + 's';
+    piece.style.width = piece.style.height = (Math.random() * 8 + 4) + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    container.appendChild(piece);
+  }
+}
+
+check();
+</script>
+</body>
+</html>
